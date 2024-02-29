@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 # input and output data
-input_data/
-output_data/
+# input_data/
+# output_data/
