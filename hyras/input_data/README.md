@@ -1,12 +1,3 @@
-# HYRAS
-
-Download the HYRAS netCDFs from the DWD opendata server: https://opendata.dwd.de/climate_environment/CDC/grids_germany/daily/hyras_de/
-
-Use the netCDFs files covering the entire temporal range (e.g. `tasmin_hyras_5_1951_2020_v5-0_de.nc`), except for RadiationGlobal, where a merged netCDFs file does not exist. Here you have to download the yearly netCDF files.
-
-
-
-
 # HYRAS - Hydrometeorological Gridded Data
 
 ## Description
