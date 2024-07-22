@@ -43,6 +43,7 @@ RUN git clone https://github.com/isciences/exactextract
 RUN pip install /exactextract
 
 # Change working directory
+COPY ./scripts /scripts
 WORKDIR /scripts
 
 # Run Python script to clip hyras in parallel
