@@ -47,10 +47,59 @@ def merge_hyras_metadata():
     hyras_metadata.to_csv("/output_data/scripts/hyras_exact_extract_availability.csv")
 
 
+def rename_columns():
+    """
+    Rename the columns of the extracted HYRAS csv dataframe to
+    CAMELS-DE variables.
+    
+    """
+    # get metadata
+    metadata = get_metadata()
+
+    # get camels_ids
+    camels_ids = metadata["camels_id"].values
+    
+    # iterate over all stations
+    for camels_id in camels_ids:
+        # get data files for this station
+        data_files = glob(f"/output_data/{camels_id}/data/*.csv")
+
+        # iterate over all data files
+        for data_file in data_files:
+            # load data
+            df = pd.read_csv(data_file, index_col=0)
+
+            # get columns
+            columns = df.columns
+
+            # rename columns
+            if "hurs_" in columns[0]:
+                new_colnames = [c.replace("hurs", "humidity") for c in columns]
+            elif "rsds_" in columns[0]:
+                new_colnames = [c.replace("rsds", "radiation_global") for c in columns]
+            elif "tasmin_" in columns[0]:
+                new_colnames = [c.replace("tasmin", "temperature_min") for c in columns]
+            elif "tasmax_" in columns[0]:
+                new_colnames = [c.replace("tasmax", "temperature_max") for c in columns]
+            elif "tas_" in columns[0]:
+                new_colnames = [c.replace("tas", "temperature_mean") for c in columns]
+            elif "pr_" in columns[0]:
+                new_colnames = [c.replace("pr", "precipitation") for c in columns]
+            else:
+                new_colnames = columns
+
+            # rename columns
+            df.columns = new_colnames
+
+            # save data
+            df.to_csv(data_file)
+
+
 def add_hyras_to_station_folder():
     """
     Add extracted HYRAS data to the CAMELS-DE data folder of 
-    each station.
+    each station.  
+    We only copy the extracted csv files to the camelsp folder.
     
     """
     # get metadata
@@ -65,24 +114,24 @@ def add_hyras_to_station_folder():
         s = Station(camels_id)
 
         # get Station output path
-        station_output_path = s.output_path()
+        station_output_path = s.output_path
 
-        # get hyras output path
-        hyras_output_path = f"/output_data/{camels_id}"
+        # get extracted hyras csv files
+        hyras_files = glob(f"/output_data/{camels_id}/data/*.csv")
 
-        # check if hyras_output_path exists
-        if not os.path.exists(hyras_output_path):
+        # check if hyras output exists
+        if len(hyras_files) == 0:
             continue
         
-        # copy contents of hyras data to station
-        shutil.copytree(hyras_output_path, station_output_path)
+        # create hyras folder in camelsp directory
+        os.makedirs(f"{station_output_path}/hyras", exist_ok=True)
 
-        # rename hyras data folder to hyras
-        os.rename(f"{station_output_path}/{camels_id}", f"{station_output_path}/hyras")
-        
-    return None
+        # copy hyras csv files to station folder
+        for hyras_file in hyras_files:
+            shutil.copy(hyras_file, f"{station_output_path}/hyras/")
 
 
 if __name__ == "__main__":
     merge_hyras_metadata()
+    rename_columns()
     add_hyras_to_station_folder()
