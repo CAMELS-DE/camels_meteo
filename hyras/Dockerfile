@@ -19,14 +19,31 @@ RUN pip install openpyxl==3.1.2
 RUN pip install papermill==2.5.0
 RUN pip install jupyter==1.0.0
 
-# Install aditional dependencies for clipping hyras with fixed versions
-RUN pip install xarray[complete]==2023.12.0
-RUN pip install rioxarray==0.15.0
-RUN pip install dask==2023.12.1
-RUN pip install exactextract==0.2.0.dev0
-RUN pip install contextily==1.5.0
-
 # Install camelsp from GitHub
 RUN git clone https://github.com/CAMELS-DE/camelsp.git
 RUN pip install -e /camelsp 
 
+# Install aditional dependencies for clipping hyras with fixed versions
+RUN pip install xarray[complete]==2023.12.0
+RUN pip install rioxarray==0.15.0
+RUN pip install dask==2023.12.1
+RUN pip install contextily==1.5.0
+
+# Install dependencies for exactextract
+ RUN apt-get update && apt-get install -y \
+      gdal-bin \
+      libgdal-dev \
+      libgeos-dev 
+
+# # further dependencies for exactextract
+RUN pip install "pybind11[global]"
+
+# Clone exactextract from Github
+RUN git clone https://github.com/isciences/exactextract
+RUN pip install /exactextract
+
+# Change working directory
+WORKDIR /scripts
+
+# Run Python script to clip hyras in parallel
+CMD ["/bin/bash", "process_hyras.sh"]
